@@ -1,45 +1,49 @@
-'''
-Created on Jun 1, 2015
-Last modified on Mar 29, 2016
+#!/usr/bin/env python
 
-@author: ahmeda, jakub
-'''
+'''Workload generator for MediaWiki'''
 
+import sys
+import getopt
+import time
+import requests
+import math
+import traceback
+import random
 import multiprocessing as mp
-import time,requests,math,traceback
+import numpy as np
 from __main__ import traceback
 from itertools import chain
-import numpy as np
-import sys, getopt
+
+
+'''
+    Created on Jun 1, 2015
+    Last modified on Apr 2, 2016
+'''
+
+__authors__ = "Ahmed Ali, Jakub Krzywda"
+__copyright__ = "Copyright 2016, Umea University"
+__credits__ = ["Ahmed Ali", "Jakub Krzywda"]
+__license__ = "MIT"
+__version__ = "1.0"
+__maintainer__ = "Jakub Krzywda"
+__email__ = "jakub@cs.umu.se"
+__status__ = "Prototype"
 
 
 HOST='http://p08.ds.cs.umu.se:8112/gw'
-#HOST='http://p03.ds.cs.umu.se:8082/gw'
-#LINK='/index.php/Liste_der_DIN-Normen'
 LINK='/index.php/Porsche_935'
 
-# Links=open("links.out",'r')
-# links=Links.readlines()
-
-# host='http://p18.ds.cs.umu.se:8112/gw'
 host=HOST
-# links=["%s%s"%(host,l.strip()) for l in links]
 
 DROP_REQUESTS_AFTER=10
-
-# workload=open('de.out','r')
-# workload=workload.readlines()
-# workload_German=[math.ceil(int(i.split()[2].strip())/3600) for i in workload]
-# workload_ramp=range(1,101)
-# print workload
-# print r.text
-
  
 fn = './MultiProcessedResponseTime.out'
-# 
+
+def nextTime(rateParameter):
+    return -math.log(1.0 - random.random()) / rateParameter
+
 def worker(j,q):
-    '''stupidly simulates long running process'''
-#     for weights in ['uniform', 'distance']:
+    ''' simulates long running process'''
     t1=time.time()
     r = requests.get('%s%s'%(host,LINK), timeout=DROP_REQUESTS_AFTER)
     t2=time.time()
@@ -47,7 +51,6 @@ def worker(j,q):
     RT=t2-t1
     out=str(RT)+"  "+str(j)+"   "+str(t1)+"   ",r.status_code
     q.put(out)
-#    print "out", out
     return out
  
 def listener(q):
@@ -56,7 +59,6 @@ def listener(q):
     f = open(fn, 'wb') 
     while 1:
         m = q.get()
-#	print "m", m
         if m == 'kill':
             f.write('killed')
             break
@@ -65,9 +67,7 @@ def listener(q):
     f.close()
  
 def main(argv):
-    #print 'Number of arguments:', len(sys.argv), 'arguments.'
-    #print 'Argument List:', str(sys.argv)
-
+    # default configuration
     workloadProfile = 'constant'
     constReqNumber = 1
     maxReqNumber = 10
@@ -125,7 +125,6 @@ def main(argv):
 
     print 'Max number of requests in the system (workers):', requestPoolSize
 
-    #DROP_REQUESTS_AFTER=10
     SLEEP=1
 
     #must use Manager queue here, or will not work
@@ -135,23 +134,41 @@ def main(argv):
  
     #put listener to work first
     watcher = pool.apply_async(listener, (q,))
- 
-     
+
+    if distribution == 'poissonian':
+        TimeOfReq = []
+        for i in range(stepSize, maxReqNumber, stepSize):
+            for j in range(repAtLevel):
+                summer = 0
+                for k in range(1, i):
+                    const = nextTime(i)
+                    TimeOfReq += [const]
+                    summer += const
+                if summer<1:
+                    TimeOfReq[-1] = 1 - summer + TimeOfReq[-1]
+#               elif summer>1:
+#                   x[-1]=1-summer-x[-1]
+
     jobs = []
     #fire off workers
+    k=0
     for i in NUMBER_OF_REQUESTS:
         print i
-        #if distribution == 'concurrent':
-        time.sleep(SLEEP)
-        #if distribution in ("evenly_spread", "poissonian"):
-        #    if i > 0:
-        #        SLEEP_DIVIDED = SLEEP / float(i)
-        #    else:
-        #        time.sleep(SLEEP)
 
-        for j in range(1,i+1):
-        #    if distribution in ("evenly_spread", "poissonian"):
-        #        time.sleep(SLEEP_DIVIDED)
+        if i == 0:
+            time.sleep(SLEEP)
+        else:
+            if distribution == 'concurrent':
+                time.sleep(SLEEP)
+            if distribution == 'evenly_spread':
+                SLEEP_DIVIDED = SLEEP / float(i)
+
+        for j in range(1, i+1):
+            if distribution == 'evenly_spread':
+                time.sleep(SLEEP_DIVIDED)
+            if distribution == 'poissonian':
+                time.sleep(TimeOfReq[k])
+                k += 1
             job = pool.apply_async(worker, (i,q))
             jobs.append(job)        
  
@@ -159,7 +176,6 @@ def main(argv):
     for job in jobs: 
         try:
             job.get()
-#	    print xxx
         except :
           print "There was an error"
           print traceback.print_exc()
