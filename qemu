@@ -1,0 +1,272 @@
+#!/bin/bash
+#
+# ZYV
+#
+# This horrible script adds and removes iptables rules to allow for port
+# forwarding from the host machine (virtualization server) to the selected
+# virtualized guests.
+#
+# Unfortunately, libvirt inserts its own FORWARD rules along with final REJECTs
+ # at the very top of the table, so the rules defined via iptables config will
+# be rendered ineffective, hence the need for this hook.
+#
+echo testing $1 $2>> /tmp/qemu-test
+set -e
+set -u
+
+iptables='/sbin/iptables'
+
+# Ideally, rewrite as ERB template and fetch this from Puppet
+external_ifs='eth1'
+external_ip='130.239.48.222'
+
+# List the machines here
+machines=('WikiImage_German1' 'WikiImage_German2' 'WikiImage_German3’ 'WikiImage_German4' 'WikiImage_German5’ 'WikiImage_German6' 'WikiImage_German7' 'WikiImage_German8' 'WikiImage_German9' 'WikiImage_German10' 'WikiImage_German11' 'WikiImage_German12' 'WikiImage_German13' 'WikiImage_German14' 'WikiImage_German15' 'WikiImage_German16' 'WikiImage_German17' 'WikiImage_German18' 'WikiImage_German19' 'WikiImage_German20' 'WikiImage_German21' 'WikiImage_German22' 'WikiImage_German23' 'WikiImage_German24' 'WikiImage_German25' 'WikiImage_German26' 'WikiImage_German27' 'WikiImage_German28' 'WikiImage_German29' 'WikiImage_German30' 'WikiImage_German31' 'WikiImage_German32' 'WikiImage_German33’ 'WikiImage_German34’ 'WikiImage_German35’)
+
+# Machine definition block
+WikiImage_German1_hostname='WikiImage_German1'
+WikiImage_German1_ip='192.168.4.1'
+WikiImage_German1_sport=( '8081' '443' '3021' )
+WikiImage_German1_dport=( '80' '8443' '22' )
+
+WikiImage_German2_hostname='WikiImage_German2'
+WikiImage_German2_ip='192.168.4.2'
+WikiImage_German2_sport=( '8082' '444' '3022')
+WikiImage_German2_dport=( '80' '8443' '22')
+
+WikiImage_German3_hostname='WikiImage_German3’
+WikiImage_German3_ip='192.168.4.3'
+WikiImage_German3_sport=( '8083' '445' '3023')
+WikiImage_German3_dport=( '80' '8443' '22')
+
+WikiImage_German4_hostname='WikiImage_German4'
+WikiImage_German4_ip='192.168.4.4'
+WikiImage_German4_sport=( '8084' '446' '3024')
+WikiImage_German4_dport=( '80' '8443' '22')
+
+WikiImage_German5_hostname='WikiImage_German5'
+WikiImage_German5_ip='192.168.4.5'
+WikiImage_German5_sport=( '8085' '447' '3025')
+WikiImage_German5_dport=( '80' '8443' '22')
+
+WikiImage_German6_hostname='WikiImage_German6'
+WikiImage_German6_ip='192.168.4.6'
+WikiImage_German6_sport=( '8086' '448' '3026')
+WikiImage_German6_dport=( '80' '8443' '22')
+
+WikiImage_German7_hostname='WikiImage_German7'
+WikiImage_German7_ip='192.168.4.7'
+WikiImage_German7_sport=( '8087' '449' '3027')
+WikiImage_German7_dport=( '80' '8443' '22')
+
+WikiImage_German8_hostname='WikiImage_German8'
+WikiImage_German8_ip='192.168.4.8'
+WikiImage_German8_sport=( '8088' '450' '3028')
+WikiImage_German8_dport=( '80' '8443' '22')
+
+WikiImage_German9_hostname='WikiImage_German9'
+WikiImage_German9_ip='192.168.4.9'
+WikiImage_German9_sport=( '8089' '451' '3029')
+WikiImage_German9_dport=( '80' '8443' '22')
+
+WikiImage_German10_hostname='WikiImage_German10'
+WikiImage_German10_ip='192.168.4.10'
+WikiImage_German10_sport=( '8090' '452' '3030')
+WikiImage_German10_dport=( '80' '8443' '22')
+
+WikiImage_German11_hostname='WikiImage_German11'
+WikiImage_German11_ip='192.168.4.11'
+WikiImage_German11_sport=( '8091' '453' '3031')
+WikiImage_German11_dport=( '80' '8443' '22')
+
+WikiImage_German12_hostname='WikiImage_German12'
+WikiImage_German12_ip='192.168.4.12'
+WikiImage_German12_sport=( '8092' '454' '3032')
+WikiImage_German12_dport=( '80' '8443' '22')
+
+WikiImage_German13_hostname='WikiImage_German4_1'
+WikiImage_German13_ip='192.168.4.13'
+WikiImage_German13_sport=( '8093' '455'  '3033')
+WikiImage_German13_dport=( '80' '8443' '22')
+
+WikiImage_German14_hostname='WikiImage_German14'
+WikiImage_German14_ip='192.168.4.14'
+WikiImage_German14_sport=( '8094' '456' '3034')
+WikiImage_German14_dport=( '80' '8443' '22')
+
+WikiImage_German15_hostname='WikiImage_German15'
+WikiImage_German15_ip='192.168.4.15'
+WikiImage_German15_sport=( '8095' '457'  '3035')
+WikiImage_German15_dport=( '80' '8443' '22')
+
+WikiImage_German16_hostname='WikiImage_German16'
+WikiImage_German16_ip='192.168.4.16'
+WikiImage_German16_sport=( '8096' '458' '3036')
+WikiImage_German16_dport=( '80' '8443' '22')
+
+WikiImage_German17_hostname='WikiImage_German17'
+WikiImage_German17_ip='192.168.4.17'
+WikiImage_German17_sport=( '8097' '459' '3037' )
+WikiImage_German17_dport=( '80' '8443' '22')
+
+WikiImage_German18_hostname='WikiImage_German18'
+WikiImage_German18_ip='192.168.4.18'
+WikiImage_German18_sport=( '8098' '460' '3038')
+WikiImage_German18_dport=( '80' '8443' '22')
+
+WikiImage_German19_hostname='WikiImage_German19'
+WikiImage_German19_ip='192.168.4.19'
+WikiImage_German19_sport=( '8099' '461' '3039')
+WikiImage_German19_dport=( '80' '8443' '22')
+
+WikiImage_German20_hostname='WikiImage_German20'
+WikiImage_German20_ip='192.168.4.20'
+WikiImage_German20_sport=( '8100' '462' '3040')
+WikiImage_German20_dport=( '80' '8443' '22')
+
+WikiImage_German21_hostname='WikiImage_German21'
+WikiImage_German21_ip='192.168.4.21'
+WikiImage_German21_sport=( '8101' '463' '3041')
+WikiImage_German21_dport=( '80' '8443' '22')
+
+WikiImage_German22_hostname='WikiImage_German22'
+WikiImage_German22_ip='192.168.4.22'
+WikiImage_German22_sport=( '8102' '464' '3042')
+WikiImage_German22_dport=( '80' '8443' '22')
+
+WikiImage_German23_hostname='WikiImage_German23'
+WikiImage_German23ip='192.168.4.23'
+WikiImage_German23_sport=( '8103' '465' '3043')
+WikiImage_German23_dport=( '80' '8443' '22')
+
+WikiImage_German24_hostname='WikiImage_German24'
+WikiImage_German24_ip='192.168.4.24'
+WikiImage_German24_sport=( '8104' '466'  '3044')
+WikiImage_German24_dport=( '80' '8443' '22')
+
+WikiImage_German25_hostname='WikiImage_German25'
+WikiImage_German25_ip='192.168.4.25'
+WikiImage_German25_sport=( '8105' '467' '3045')
+WikiImage_German25_dport=( '80' '8443' '22')
+
+WikiImage_German26_hostname='WikiImage_German26'
+WikiImage_German26_ip='192.168.4.26'
+WikiImage_German26_sport=( '8106' '468' '3046')
+WikiImage_German26_dport=( '80' '8443' '22')
+
+WikiImage_German27_hostname='WikiImage_German27'
+WikiImage_German27_ip='192.168.4.27'
+WikiImage_German27_sport=( '8107' '469' '3047')
+WikiImage_German27_dport=( '80' '8443' '22')
+
+WikiImage_German28_hostname='WikiImage_German28'
+WikiImage_German28_ip='192.168.4.28'
+WikiImage_German28_sport=( '8108' '470'  '3048')
+WikiImage_German28_dport=( '80' '8443' '22')
+
+WikiImage_German29_hostname='WikiImage_German29'
+WikiImage_German29_ip='192.168.4.29'
+WikiImage_German29_sport=( '8109' '471' '3049')
+WikiImage_German29_dport=( '80' '8443' '22')
+
+WikiImage_German30_hostname='WikiImage_German30'
+WikiImage_German30_ip='192.168.4.30'
+WikiImage_German30_sport=( '8110' '472' '3050')
+WikiImage_German30_dport=( '80' '8443' '22')
+
+WikiImage_German31_hostname='WikiImage_German31'
+WikiImage_German31_ip='192.168.4.31'
+WikiImage_German31_sport=( '8111' '473' '3051')
+WikiImage_German31_dport=( '80' '8443' '22')
+
+WikiImage_German32_hostname='LB'
+WikiImage_German32_ip='192.168.4.32'
+WikiImage_German32_sport=( '8112' '474' '3052')
+WikiImage_German32_dport=( '80' '8443' '22')
+
+WikiImage_German33_hostname='WikiImage_German33’
+WikiImage_German33_ip='192.168.4.33’
+WikiImage_German33_sport=( '8113’ '475’ '3053’)
+WikiImage_German33_dport=( '80' '8443' '22')
+
+WikiImage_German34_hostname='WikiImage_German34’
+WikiImage_German34_ip='192.168.4.34’
+WikiImage_German34_sport=( '8114’ '476’ '3054’)
+WikiImage_German34_dport=( '80' '8443' '22')
+
+WikiImage_German35_hostname='WikiImage_German35’
+WikiImage_German35_ip='192.168.4.35’
+WikiImage_German35_sport=( '8115’ '477’ '3055’)
+WikiImage_German35_dport=( '80' '8443' '22')
+
+ rules_update() {
+ 
+     domain="$1"
+     action="$2"
+ 
+     for host in ${machines[@]}; do
+ 
+         eval host_name="\$${host}_hostname"
+
+        if [ "$domain" == "${host_name}" ]; then
+
+            eval host_ip="\$${host}_ip"
+ 
+             eval host_sport=( \${${host}_sport[@]} )
+             eval host_dport=( \${${host}_dport[@]} )
+
+             length=$(( ${#host_sport[@]} - 1 ))
+ 
+             for i in `seq 0 $length`; do
+ 
+                for external_if in ${external_ifs}; do
+ 
+                    #PREROUTING="$iptables -t nat $action PREROUTING -d ${external_ip} -i ${external_if} -p tcp -m tcp --dport ${host_sport[$i]} -j DNAT --to-destination ${host_ip}:${host_dport[$i]}"
+                    PREROUTING="$iptables -t nat $action PREROUTING -d ${external_ip} -p tcp -m tcp --dport ${host_sport[$i]} -j DNAT --to-destination ${host_ip}:${host_dport[$i]}"
+ 
+                     if [ -z "${DEBUG_RULES:-}" ]; then
+                         `$PREROUTING`
+                     else
+                         echo $PREROUTING
+                     fi
+ 
+                 done
+ 
+                 FORWARD="$iptables $action FORWARD -d ${host_ip} -p tcp -m state --state NEW -m tcp --dport ${host_dport[$i]} -j ACCEPT"
+ 
+                 if [ -z "${DEBUG_RULES:-}" ]; then
+                     `$FORWARD`
+                else
+                    echo $FORWARD
+                 fi
+
+            done
+ 
+         fi
+ 
+     done
+  
+ }
+  
+  domain_name="$1"
+  domain_task="$2"
+  
+  case "${domain_task}" in
+      # hook is called with <domain_name> start begin - 
+	start)
+         rules_update ${domain_name} " -I "
+     ;;
+     # hook is called with <domain_name> stopped end -
+    stopped)
+          rules_update ${domain_name} " -D "
+      ;;
+       # libvirtd restart hook, added in libvirt-0.9.13
+      reconnect)
+           rules_update ${domain_name} " -D "
+           rules_update ${domain_name} " -I "
+       ;;
+       *)
+           echo "qemu hook called with unexpected options $*" >&2
+       ;;
+  esac
+ 
