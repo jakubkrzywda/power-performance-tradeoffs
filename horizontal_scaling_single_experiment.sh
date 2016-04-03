@@ -6,7 +6,7 @@
 # ----------------------------------------------
 
 host= # address of the physical machine hosting virtual machines
-user= # user at the physical machine with permisions to
+user= # user at the physical machine with permissions to
 address= # address for measuring the power consumption
 vms=1 # number of virtual machines
 frequency=2.1 # cpu frequency
