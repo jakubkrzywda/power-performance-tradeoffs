@@ -17,7 +17,7 @@ from itertools import chain
 
 '''
     Created on Jun 1, 2015
-    Last modified on Apr 2, 2016
+    Last modified on Apr 3, 2016
 '''
 
 __authors__ = "Ahmed Ali, Jakub Krzywda"
@@ -30,7 +30,7 @@ __email__ = "jakub@cs.umu.se"
 __status__ = "Prototype"
 
 
-HOST='http://p08.ds.cs.umu.se:8112/gw'
+HOST='http://{SERVER_HOSTING_VMS}/gw'
 LINK='/index.php/Porsche_935'
 
 host=HOST
