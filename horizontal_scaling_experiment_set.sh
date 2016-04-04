@@ -11,90 +11,97 @@ FREQ= # the desired CPU frequency of HOST
 COOL_DOWN_POWER= # the power consumption of an idle HOST
 
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
+
+# 4 VIRTUAL MACHINES UNPINNED
 ssh $USER@$HOST "./unpinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 4 -f $FREQ -i unpinned_memcached_0
+./MediaWiki_single_experiment.sh -v 4 -f $FREQ -i unpinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 4 -f $FREQ -i unpinned_memcached_1
+./MediaWiki_single_experiment.sh -v 4 -f $FREQ -i unpinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 4 -f $FREQ -i unpinned_memcached_2
+./MediaWiki_single_experiment.sh -v -f $FREQ -i unpinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 4 VIRTUAL MACHINES PINNED
 ssh $USER@$HOST "./pinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 4 -f $FREQ -i pinned_memcached_0
+./MediaWiki_single_experiment.sh -v 4 -f $FREQ -i pinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 4 -f $FREQ -i pinned_memcached_1
+./MediaWiki_single_experiment.sh -v 4 -f $FREQ -i pinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 4 -f $FREQ -i pinned_memcached_2
+./MediaWiki_single_experiment.sh -v 4 -f $FREQ -i pinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 3 VIRTUAL MACHINES UNPINNED
 ssh $USER@$HOST "virsh shutdown WikiImage_German31"
-
+sleep 60
 ssh $USER@$HOST "./unpinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 3 -f $FREQ -i unpinned_memcached_0
+./MediaWiki_single_experiment.sh -v 3 -f $FREQ -i unpinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 3 -f $FREQ -i unpinned_memcached_1
+./MediaWiki_single_experiment.sh -v 3 -f $FREQ -i unpinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 3 -f $FREQ -i unpinned_memcached_2
+./MediaWiki_single_experiment.sh -v 3 -f $FREQ -i unpinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 3 VIRTUAL MACHINES PINNED
 ssh $USER@$HOST "./pinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 3 -f $FREQ -i pinned_memcached_0
+./MediaWiki_single_experiment.sh -v 3 -f $FREQ -i pinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 3 -f $FREQ -i pinned_memcached_1
+./MediaWiki_single_experiment.sh -v 3 -f $FREQ -i pinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 3 -f $FREQ -i pinned_memcached_2
+./MediaWiki_single_experiment.sh -v 3 -f $FREQ -i pinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 2 VIRTUAL MACHINES UNPINNED
 ssh $USER@$HOST "virsh shutdown WikiImage_German33"
-sleep 120
-
+sleep 60
 ssh $USER@$HOST "./unpinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 2 -f $FREQ -i unpinned_memcached_0
+./MediaWiki_single_experiment.sh -v 2 -f $FREQ -i unpinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 2 -f $FREQ -i unpinned_memcached_1
+./MediaWiki_single_experiment.sh -v 2 -f $FREQ -i unpinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 2 -f $FREQ -i unpinned_memcached_2
+./MediaWiki_single_experiment.sh -v 2 -f $FREQ -i unpinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 2 VIRTUAL MACHINES PINNED
 ssh $USER@$HOST "./pinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 2 -f $FREQ -i pinned_memcached_0
+./MediaWiki_single_experiment.sh -v 2 -f $FREQ -i pinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 2 -f $FREQ -i pinned_memcached_1
+./MediaWiki_single_experiment.sh -v 2 -f $FREQ -i pinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 2 -f $FREQ -i pinned_memcached_2
+./MediaWiki_single_experiment.sh -v 2 -f $FREQ -i pinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 1 VIRTUAL MACHINE UNPINNED
 ssh $USER@$HOST "virsh shutdown WikiImage_German34"
-sleep 120
-
+sleep 60
 ssh $USER@$HOST "./unpinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 1 -f $FREQ -i unpinned_memcached_0
+./MediaWiki_single_experiment.sh -v 1 -f $FREQ -i unpinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 1 -f $FREQ -i unpinned_memcached_1
+./MediaWiki_single_experiment.sh -v 1 -f $FREQ -i unpinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 1 -f $FREQ -i unpinned_memcached_2
+./MediaWiki_single_experiment.sh -v 1 -f $FREQ -i unpinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
 
+# 1 VIRTUAL MACHINE PINNED
 ssh $USER@$HOST "./pinVMs8cores.sh"
 
 sleep 10
-./test-horizontal-performance.sh -c 1 -f $FREQ -i pinned_memcached_0
+./MediaWiki_single_experiment.sh -v 1 -f $FREQ -i pinned_memcached_0
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 1 -f $FREQ -i pinned_memcached_1
+./MediaWiki_single_experiment.sh -v 1 -f $FREQ -i pinned_memcached_1
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
-./test-horizontal-performance.sh -c 1 -f $FREQ -i pinned_memcached_2
+./MediaWiki_single_experiment.sh -v 1 -f $FREQ -i pinned_memcached_2
 ./tests-multi-cores-util-power-cool-down.sh --node $HOST --cooldownpower $COOL_DOWN_POWER
