@@ -14,7 +14,7 @@ frequency=2.1 # cpu frequency
 measurement_duration=440 # measurement duration [in seconds]: 40 [steps/levels] * 10 [repetitions at each step/level] + 40 [safe margin]
 node= # name of physical machine for logging purposes
 results_directory=tests # directory to store experiment results
-results_filename_prefix=horizontal-scaling # directory to store experiment results
+results_filename_prefix=horizontal-scaling # prefix of the filename describing the results
         
 while [ "$1" != "" ]; do
     case $1 in
