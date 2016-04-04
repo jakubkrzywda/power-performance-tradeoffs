@@ -7,7 +7,8 @@
 
 host= # address of the physical machine hosting virtual machines
 user= # user at the physical machine with permissions to
-address= # address for measuring the power consumption
+power_measurement_server= # address of the physical machine providing the power consumption measurements
+host_address= # address for measuring the power consumption of the host
 vms=1 # number of virtual machines
 frequency=2.1 # cpu frequency
 measurement_duration=440 # measurement duration [in seconds]: 40 [steps/levels] * 10 [repetitions at each step/level] + 40 [safe margin]
@@ -42,7 +43,7 @@ python WikipediaGenerator.py -p evenly_spread -m 200 -s 5 -r 10 -w 200 &
 start_time=$SECONDS
 while [ $SECONDS -lt $((start_time + measurement_duration)) ]
 do
-  snmpget -c public -v 2c bigmama.ds.cs.umu.se $address | awk -v pm="$node" -v freq="$freq_m" -v vms="$vms" -v time="$((SECONDS - beginning))" -v percentage="$percentage" -v iteration="$i" -v temperature="$temperature" '//{print pm";"freq";"vms";"$4";"time";"percentage";"iteration temperature}' >> tests/dvfs-power-performance_${vms}_${frequency}_${experiment_id}.csv
+  snmpget -c public -v 2c $power_measurement_server $host_address | awk -v pm="$node" -v freq="$freq_m" -v vms="$vms" -v time="$((SECONDS - beginning))" -v percentage="$percentage" -v iteration="$i" -v temperature="$temperature" '//{print pm";"freq";"vms";"$4";"time";"percentage";"iteration temperature}' >> tests/dvfs-power-performance_${vms}_${frequency}_${experiment_id}.csv
   sleep 1
 done
 
